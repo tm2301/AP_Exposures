@@ -1,0 +1,25 @@
+What it does: For each subject, averages daily PM2.5, O3, and NO2 over the 9 calendar months prior to DOB.
+
+Exposure window logic:
+
+window_end = DOB − 1 day
+window_start = first day of the month that is 9 months before DOB
+(e.g., DOB = 2005-10-15 → window = 2005-01-01 to 2005-10-14)
+Inputs:
+File: Required columns
+subjects.csv:	subject_id, dob, zip
+aq_data/ (CSVs from NASA portal):	ZIP, Date, PM25, O3, NO2
+
+
+What this script does: 
+Accepts a single CSV or a directory of CSVs (the dataset ships one file per year)
+Column names are configurable via the AQ_COLS list at the top if yours differ
+
+Outputs:
+subjects_with_aq_exposure.csv — original subject data plus:
+pm25_mean, o3_mean, no2_mean (prenatal averages)
+n_days_pm25/o3/no2 (data coverage diagnostics)
+
+
+Key implementation note: Uses a left_join + date-range filter rather than a row-by-row loop, so it scales to large cohorts without being slow. 
+Subjects with no matching AQ data (wrong ZIP or DOB outside 2000–2016) get NA with a warning.
